@@ -1,0 +1,12 @@
+{
+  "jspm": {
+    "directories": {},
+    "dependencies": {
+      "react": "npm:react@^0.14.0",
+      "ts": "github:frankwallis/plugin-typescript@^2.0.17"
+    },
+    "devDependencies": {
+      "typescript": "npm:typescript@1.5.3"
+    }
+  }
+}
