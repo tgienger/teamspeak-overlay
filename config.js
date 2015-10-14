@@ -28,20 +28,19 @@ System.config({
           "loader": "css"
         }
       }
-    },
+    }
   },
 
   map: {
+    "app": "src/App",
+    "header": "src/Header",
+    "menu": "src/Menu",
     "react": "npm:react@0.14.0",
     "ts": "github:frankwallis/plugin-typescript@2.0.17",
     "typescript": "npm:typescript@1.5.3",
     "github:frankwallis/plugin-typescript@2.0.17": {
       "typescript": "npm:typescript@1.6.2"
     },
-    "menu": "src/Menu",
-    "app": "src/App",
-    "header": "src/Header",
-    
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
     },

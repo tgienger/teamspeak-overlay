@@ -15,7 +15,7 @@ export default class Menu extends React.Component<MenuProps, any> {
 		if (this.props.visible) {
 			menu = (
 				<div>
-					Hello Discord!
+					Menu Placeholder
 				</div>
 			);
 		}
