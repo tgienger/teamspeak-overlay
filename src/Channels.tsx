@@ -2,16 +2,17 @@
 
 import * as React from 'react';
 import ChannelList from './ChannelList';
+import {Channel, Plugin} from 'teamspeak';
 
-class Channel {
-	channelId:string;
-	channelName:string;
-	parentId:string;
-	children:Channel[];
-	constructor() {
-		this.children = [];
-	}
-}
+// class Channel {
+// 	channelId:string;
+// 	channelName:string;
+// 	parentId:string;
+// 	children:Channel[];
+// 	constructor() {
+// 		this.children = [];
+// 	}
+// }
 
 
 
@@ -22,11 +23,12 @@ class ChannelsProps {
 
 
 
-
+/**
+ * Collects Channel information form current server.
+ */
 export default class Channels extends React.Component<ChannelsProps, {}> {
-	private plugin: () => any;
-	private data: [Channel];
-
+	private plugin:Plugin;
+	private data: Channel[];
 
 
 
@@ -45,12 +47,12 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 
 
 	componentDidMount() {
-		this.plugin = () => document.querySelector('#pluginTeamspeak');
-
-		this.plugin().addEventListener('onServerStatusChange', data => {
+		this.plugin = document.querySelector('#pluginTeamspeak');
+		
+		this.plugin.addEventListener('onServerStatusChange', data => {
 			console.log('Server Status Change: ', data);
 			if (data.serverId) {
-				this.plugin().getChannels(data.serverId, (err, channels) => {
+				this.plugin.getChannels(data.serverId, (err, channels:Channel[]) => {
 					if (err) { console.log(err); }
 					
 					this.handleData(channels);
@@ -61,14 +63,14 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 
 		setTimeout(() => {
 			const serverOptions = { tab: "currentTab", label: "ts3 public server", address: "ck-gaming.com", nickName: "premed-testing" };
-
-			this.plugin().init({ name: "Overwolf-TeamSpeak-Sample" }, (result, servers) => {
+			
+			this.plugin.init({ name: "Overwolf-TeamSpeak-Sample" }, (result, servers) => {
 					
 				// no server is connected
 				if (servers && !servers.activeServerId) {
-					this.plugin().connectToServer(serverOptions, (result, server) => {
-						this.plugin().getAllServersInfo((errorObject, servers) => {
-							this.plugin().getChannels(servers[0].serverId, (err, channels:[Channel]) => {
+					this.plugin.connectToServer(serverOptions, (result, server) => {
+						this.plugin.getAllServersInfo((errorObject, servers) => {
+							this.plugin.getChannels(servers[0].serverId, (err, channels:Channel[]) => {
 
 								if (err) { console.log(err); }
 								this.handleData(channels);
@@ -77,8 +79,8 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 					});
 				} else {
 					// server is connected
-					this.plugin().getAllServersInfo((errorObject, servers) => {
-						this.plugin().getChannels(servers[0].serverId, (err, channels) => {
+					this.plugin.getAllServersInfo((errorObject, servers) => {
+						this.plugin.getChannels(servers[0].serverId, (err, channels) => {
 							if (err) { console.log(err); }
 							this.handleData(channels);
 						});
@@ -94,7 +96,6 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 	 * Sort Channels into a tree
 	 */
 	handleData = (channels) => {
-		
 		let test = [],
 			sortedChannels:Channel[];
 		
@@ -107,7 +108,7 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 			})
 		});
 		
-		sortedChannels = channels.filter(channel => {
+		sortedChannels = channels.filter((channel:Channel) => {
 			if (channel.parentId === '0') {
 				return channel;
 			}
@@ -124,12 +125,14 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 	render() {
 
 		let channels: JSX.Element;
+		let users: JSX.Element;
 
 		if (this.props.visible) {
 			channels = (
 				<div>
 					<p>CHANNEL LIST</p>
 					<ChannelList
+						plugin={this.plugin}
 						isChild={false}
 						key={'0'}
 						data={this.state.data} />
