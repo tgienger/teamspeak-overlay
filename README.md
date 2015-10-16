@@ -8,7 +8,8 @@ Uses JSPM, React, Typescript
 
 \> jspm install
 
-I serve my pages with http-server
+
+When testing in the browser I serve my pages with http-server (not needed for overwolf)
 
 \> npm install http-server -g
 

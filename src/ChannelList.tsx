@@ -1,70 +1,61 @@
 import * as React from 'react';
 
 class IChannel {
-	channelId:string;
-	channelName:string;
-	parentId:string;
-	children:IChannel[];
+	channelId: string;
+	channelName: string;
+	parentId: string;
+	children: IChannel[];
 	constructor() {
 		this.children = [];
 	}
 }
 
 class ChannelListProps {
-	public data:IChannel[];
-	public parent:IChannel[];
+	public data: IChannel[];
+	public key;
+	public isChild;
 }
 
 export default class ChannelList extends React.Component<ChannelListProps, any> {
-	private plugin:() => any;
-	
+	private plugin: () => any;
+
 	constructor(props) {
 		super(props);
 	}
-	
+
 	render() {
-		let channels:JSX.Element;
-		let newParent;
-		newParent = [];
-		
-		let n:string;
-		if (this.props.parent.length) {
-			n = (parseInt(this.props.parent[0].parentId) + 1).toString();
-		}
+		let channels;
 		
 		const childStyle = {
-			marginLeft: '50px'
-		};
+			paddingLeft: '50px'
+		}
 		
 		let style;
 		
+		if (this.props.isChild) {
+			style = childStyle;
+		}
 		channels = (
-			<div>
-			{ 
-				this.props.parent.map(j => {
-					return this.props.data.map(i => {
-						if (i.parentId === j.channelId) {
-							i.children = [];
-							j.children.push(i);
-						}
-						console.log(j.children);
-						if (j.parentId !== '0') {
-							style = childStyle;
-						}
-						
-						if (i.parentId === n) {
-							newParent.push(i);
-						}
-						
-						return (
-							<div style={style} key={j.channelId} >{j.channelName} {j.channelId} {j.parentId}
-								<ChannelList 
-									data={j.children}
-									parent={newParent} />
-							</div>
-						);
-					})
+			<div style={style} key={this.props.key}>
+			{
+				this.props.data.map((parent) => {
+					let children:IChannel[] = [];
+					let childrenList;
 					
+					if (parent.children.length) {
+						childrenList = (
+							<ChannelList
+								isChild={true}
+								key={parent.channelId}
+								data={parent.children} />
+						)
+					}
+					return (
+						<div key={parent.channelId}>
+							{parent.channelName}
+							{childrenList}
+						</div>
+					);
 				})
 			}
 			</div>

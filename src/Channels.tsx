@@ -3,30 +3,46 @@
 import * as React from 'react';
 import ChannelList from './ChannelList';
 
-interface IChannel extends Object {
+class Channel {
 	channelId:string;
 	channelName:string;
 	parentId:string;
-	children:IChannel[];
+	children:Channel[];
+	constructor() {
+		this.children = [];
+	}
 }
+
+
+
 
 class ChannelsProps {
 	public visible: boolean;
 }
 
+
+
+
 export default class Channels extends React.Component<ChannelsProps, {}> {
 	private plugin: () => any;
-	private data: [IChannel];
-	private parent: [IChannel];
+	private data: [Channel];
+
+
+
 
 	state = {
-		data: this.data,
-		parent:this.parent
+		data: this.data
 	}
+
+
+
 
 	constructor(props: ChannelsProps) {
 		super(props);
 	}
+
+
+
 
 	componentDidMount() {
 		this.plugin = () => document.querySelector('#pluginTeamspeak');
@@ -36,22 +52,12 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 			if (data.serverId) {
 				this.plugin().getChannels(data.serverId, (err, channels) => {
 					if (err) { console.log(err); }
-					this.setState({
-						data: channels.filter((i:IChannel) => {
-							if (i.parentId !== '0') {
-								return i;
-							}
-						}),
-						parent: channels.filter((i:IChannel) => {
-							if (i.parentId === '0') {
-								i.children = [];
-								return i;
-							}
-						})
-					});
+					
+					this.handleData(channels);
 				});
 			}
 		});
+
 
 		setTimeout(() => {
 			const serverOptions = { tab: "currentTab", label: "ts3 public server", address: "ck-gaming.com", nickName: "premed-testing" };
@@ -62,12 +68,10 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 				if (servers && !servers.activeServerId) {
 					this.plugin().connectToServer(serverOptions, (result, server) => {
 						this.plugin().getAllServersInfo((errorObject, servers) => {
-							this.plugin().getChannels(servers[0].serverId, (err, channels:[IChannel]) => {
+							this.plugin().getChannels(servers[0].serverId, (err, channels:[Channel]) => {
 
 								if (err) { console.log(err); }
-								this.setState({
-									data: channels
-								});
+								this.handleData(channels);
 							});
 						});
 					});
@@ -76,30 +80,46 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 					this.plugin().getAllServersInfo((errorObject, servers) => {
 						this.plugin().getChannels(servers[0].serverId, (err, channels) => {
 							if (err) { console.log(err); }
-
 							this.handleData(channels);
-						})
+						});
 					});
 				}
 			});
 		}, 500);
 	}
 	
+	
+	
+	/**
+	 * Sort Channels into a tree
+	 */
 	handleData = (channels) => {
-		this.setState({
-			data: channels.filter((i:IChannel) => {
-				if (i.parentId !== '0') {
-					return i;
-				}
-			}),
-			parent: channels.filter((i:IChannel) => {
-				if (i.parentId === '0') {
-					i.children = [];
-					return i;
+		
+		let test = [],
+			sortedChannels:Channel[];
+		
+		channels.forEach((parent:Channel) => {
+			parent.children = [];
+			parent.children = channels.filter((child:Channel) => {
+				if (child.parentId === parent.channelId) {
+					return child;
 				}
 			})
 		});
+		
+		sortedChannels = channels.filter(channel => {
+			if (channel.parentId === '0') {
+				return channel;
+			}
+		});
+		
+		this.setState({
+			data: sortedChannels
+		});
 	}
+
+
+
 
 	render() {
 
@@ -110,9 +130,10 @@ export default class Channels extends React.Component<ChannelsProps, {}> {
 				<div>
 					<p>CHANNEL LIST</p>
 					<ChannelList
-						data={this.state.data}
-						parent={this.state.parent} />
-					</div>
+						isChild={false}
+						key={'0'}
+						data={this.state.data} />
+				</div>
 			);
 		}
 
